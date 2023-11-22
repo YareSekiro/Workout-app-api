@@ -1,0 +1,19 @@
+@layout('app')
+@section('content')
+
+  <form action="{{ route('login')  }}"  method="POST">
+    <input type='email' name='email'>
+    <input type='password' name='password'>
+    <button type='submit'>Login</button>
+  </form>
+
+  <form action="{{ route('register')  }}"  method="POST">
+    <input type='email' name='email'>
+    <input type='password' name='password'>
+    <input type='password' name='password_confirmation'>
+    <button type='submit'>Login</button>
+  </form>
+
+  {{ inspect(flashMessages) }}
+
+@end
