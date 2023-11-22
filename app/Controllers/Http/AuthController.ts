@@ -9,6 +9,16 @@ export default class AuthController {
             return view.render('auth/login');
       }
 
+
+
+      public me({ auth }: HttpContextContract) {
+          return auth.user;
+      }
+
+      public async check({ auth, response }: HttpContextContract) {
+          return response.ok({authenticated: auth.isAuthenticated});
+      }
+
       public async login({ auth, request, response }: HttpContextContract) {
             const { email, password } = request.all();
             await auth.attempt(email, password);

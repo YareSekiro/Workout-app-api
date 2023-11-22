@@ -26,6 +26,8 @@ Route.group(() => {
     // Users logic
     Route.group(() => {
 
+        Route.get("/me", "AuthController.me");
+        Route.get("/check", "AuthController.check");
         Route.post('/register', 'AuthController.register').as('register');
         Route.get('/login', 'AuthController.showLoginForm');
         Route.post('/login', 'AuthController.login').as('login');
