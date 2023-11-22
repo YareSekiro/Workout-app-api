@@ -2,6 +2,51 @@ import { test } from '@japa/runner'
 import Database from '@ioc:Adonis/Lucid/Database'
 import UserFactory from '../../database/factories/UserFactory'
 
+
+test.group('Users', (group) => {
+
+    group.each.setup(async () => {
+        await Database.beginGlobalTransaction()
+        return () => Database.rollbackGlobalTransaction()
+    });
+
+    test('ensure we can get the current user', async ({assert, client}) => {
+
+        const user = await UserFactory.create();
+
+        const response = await client.get('/api/v1/auth/me').loginAs(user);
+
+        response.assertStatus(200);
+
+        assert.equal(response.body().id, user.id);
+
+    });
+
+    test('ensure auth check return correct status when guest', async ({ client}) => {
+
+        const response = await client.get('/api/v1/auth/check');
+
+        response.assertStatus(200);
+
+        return response.assertBodyContains({authenticated: false});
+
+    });
+
+    test('ensure auth check return correct status when auth', async ({ client}) => {
+
+        const user = await UserFactory.create();
+
+        const response = await client.get('/api/v1/auth/check').loginAs(user);
+
+        response.assertStatus(200);
+
+        return response.assertBodyContains({authenticated: true});
+
+    });
+
+
+});
+
 test.group('Users | Register', (group) => {
 
     // Pour s'assurer que la db rollback après chaque test et ainsi ne pas avoir des problèmes
