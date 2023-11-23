@@ -31,7 +31,7 @@ Route.group(() => {
         Route.post('/register', 'AuthController.register').as('register');
         Route.get('/login', 'AuthController.showLoginForm');
         Route.post('/login', 'AuthController.login').as('login');
-        Route.get('/logout', 'AuthController.logout').as('logout').middleware('auth');
+        Route.delete('/logout', 'AuthController.logout').as('logout').middleware('auth');
 
     }).prefix('auth');
 
