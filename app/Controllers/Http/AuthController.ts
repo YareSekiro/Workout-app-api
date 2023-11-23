@@ -22,7 +22,7 @@ export default class AuthController {
       public async login({ auth, request, response }: HttpContextContract) {
             const { email, password } = request.all();
             await auth.attempt(email, password);
-            return response.redirect("/api/v1/trainings");
+            return response.noContent();
       }
 
       public async register({auth,  request, response }: HttpContextContract) {

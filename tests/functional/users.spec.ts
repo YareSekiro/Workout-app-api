@@ -44,13 +44,25 @@ test.group('Users', (group) => {
 
     });
 
-    test('ensure that we can log out', async ({ client}) => {
-            const user = await UserFactory.create();
 
-            const response = await client.delete('/api/v1/auth/logout').loginAs(user);
 
-            response.assertStatus(204);
+});
+
+test.group('Users - Login / Logout', (group) => {
+
+    group.each.setup(async () => {
+        await Database.beginGlobalTransaction()
+        return () => Database.rollbackGlobalTransaction()
     });
+
+    test('ensure that we can log out', async ({ client}) => {
+        const user = await UserFactory.create();
+
+        const response = await client.delete('/api/v1/auth/logout').loginAs(user);
+
+        response.assertStatus(204);
+    });
+
 
 
 });
