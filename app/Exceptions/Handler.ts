@@ -30,7 +30,26 @@ export default class ExceptionHandler extends HttpExceptionHandler {
     // Gestion d'erreur
     public async handle(error, ctx) {
 
-        // Si l'erreur est de type ValidationException, on retourne une erreur 400 avec le message de validation
+        console.log(error.code);
+        // Unauthorized
+        if (error.code === "E_UNAUTHORIZED_ACCESS") {
+            return ctx.response.unauthorized({
+                status: 401,
+                path: ctx.request.url(),
+                code: "E_UNAUTHORIZED_ACCESS",
+                message: "You are not authorized to access this resource",
+                detail: "Ensure that you have the correct permissions and try again"
+            })
+        }
+
+        if (['E_INVALID_AUTH_UID', 'E_INVALID_AUTH_UID_PASSWORD', 'E_INVALID_AUTH_PASSWORD'].includes(error.code)) {
+            return ctx.response.badRequest({
+                code: "E_INVALID_CREDENTIALS",
+                message: "No account can be found with the provided credentials"
+            })
+        }
+
+        // Si l'erreur est de type ValidationException, on retourne une erreur 422 avec le message de validation
         if (error.code === "E_VALIDATION_FAILURE") {
             return ctx.response.unprocessableEntity({
                 status: 422,

@@ -23,6 +23,11 @@ import Route from '@ioc:Adonis/Core/Route'
 
 Route.group(() => {
 
+    Route.get('/', async () => {
+        // Default page
+        return { hello: 'world' }
+    });
+
     // Users logic
     Route.group(() => {
 

@@ -63,6 +63,69 @@ test.group('Users - Login / Logout', (group) => {
         response.assertStatus(204);
     });
 
+    test('ensure that we cannot log out when guest', async ({ client}) => {
+        const response = await client.delete('/api/v1/auth/logout');
+
+        console.log(response.body());
+
+        response.assertStatus(401);
+
+        response.assertBodyContains({
+            status: 401,
+            path: "/api/v1/auth/logout",
+            code: "E_UNAUTHORIZED_ACCESS",
+            message: "You are not authorized to access this resource",
+            detail: "Ensure that you have the correct permissions and try again"
+        })
+
+    });
+
+    test('ensure that we can log in', async ({ client}) => {
+
+        const user = await UserFactory.create();
+
+        const response = await client.post('/api/v1/auth/login').json({
+            email: user.email,
+            password: "secret1234"
+        });
+
+        response.assertStatus(204);
+
+    });
+
+    test('ensure that we cannot login with invalid email', async ({ client}) => {
+
+        const user = await UserFactory.create();
+
+        const response = await client.post('/api/v1/auth/login').json({
+            email: "az@example.com",
+            password: "secret1234"
+        });
+
+        response.assertStatus(400);
+        response.assertBodyContains({
+            code: "E_INVALID_CREDENTIALS",
+            message: "No account can be found with the provided credentials"
+        })
+
+    });
+
+    test('ensure that we cannot login with invalid password', async ({ client}) => {
+
+        const user = await UserFactory.create();
+
+        const response = await client.post('/api/v1/auth/login').json({
+            email: user.email,
+            password: "secret12345"
+        });
+
+        response.assertStatus(400);
+        response.assertBodyContains({
+            code: "E_INVALID_CREDENTIALS",
+            message: "No account can be found with the provided credentials"
+        })
+
+    });
 
 
 });
