@@ -414,7 +414,7 @@ test.group("Workouts | Index / Show", (group) => {
         return () => Database.rollbackGlobalTransaction()
     });
 
-    test('ensure that we can get all workouts', async ({assert, client}) => {
+    test('ensure that a user can get all of his workouts', async ({assert, client}) => {
 
             const user = await UserFactory.create();
 
@@ -425,6 +425,126 @@ test.group("Workouts | Index / Show", (group) => {
             response.assertStatus(200);
 
             assert.equal(response.body().length, 3);
+    });
+
+    test('ensure unauthenticated user can not get all workouts', async ({ client}) => {
+
+        await TrainingFactory.createMany(3);
+
+        const response = await client.get('/api/v1/trainings');
+
+        response.assertStatus(401);
+
+        response.assertBodyContains({
+            status: 401,
+            path: "/api/v1/trainings",
+            code: "E_UNAUTHORIZED_ACCESS",
+            message: "You are not authorized to access this resource",
+            detail: "Ensure that you have the correct permissions and try again"
+        })
+
+    });
+
+    test('ensure that a user can get one of his workout', async ({assert, client}) => {
+
+        const user = await UserFactory.create();
+
+        const training = await TrainingFactory.merge({userId: user.id}).create();
+
+        const response = await client.get(`/api/v1/trainings/${training.id}`).loginAs(user);
+
+        response.assertStatus(200);
+
+        assert.equal(response.body().id, training.id);
+
+    });
+
+    test('ensure unauthenticated user can not get a workout', async ({ client}) => {
+
+        const training = await TrainingFactory.create();
+
+        const response = await client.get(`/api/v1/trainings/${training.id}`);
+
+        response.assertStatus(401);
+
+        response.assertBodyContains({
+            status: 401,
+            path: `/api/v1/trainings/${training.id}`,
+            code: "E_UNAUTHORIZED_ACCESS",
+            message: "You are not authorized to access this resource",
+            detail: "Ensure that you have the correct permissions and try again"
+        })
+
+    });
+
+    test('ensure that an authenticated user can not get a workout that does not belong to him', async ({ client}) => {
+
+        const user = await UserFactory.create();
+
+        const training = await TrainingFactory.create();
+
+        const response = await client.get(`/api/v1/trainings/${training.id}`).loginAs(user);
+
+        response.assertStatus(404);
+
+        response.assertBodyContains({
+            status: 404,
+            path: `/api/v1/trainings/${training.id}`,
+            code: "E_RESOURCE_NOT_FOUND",
+            message: "The requested resource was not found",
+            detail: "Ensure that the resource exists and that you have the correct permissions to access it"
+        })
+    });
+
+    test('ensure that an authenticated user can not get a workout that does not exist', async ({ client}) => {
+
+        const user = await UserFactory.create();
+
+        const response = await client.get(`/api/v1/trainings/999`).loginAs(user);
+
+        response.assertStatus(404);
+
+        response.assertBodyContains({
+            status: 404,
+            path: `/api/v1/trainings/999`,
+            code: "E_RESOURCE_NOT_FOUND",
+            message: "The requested resource was not found",
+            detail: "Ensure that the resource exists and that you have the correct permissions to access it"
+        })
+    });
+
+    test('ensure that an authenticated user can not get a workout with an invalid id', async ({ client}) => {
+
+        const user = await UserFactory.create();
+
+        const response = await client.get(`/api/v1/trainings/invalid`).loginAs(user);
+
+        response.assertStatus(404);
+
+        response.assertBodyContains({
+            status: 404,
+            path: `/api/v1/trainings/invalid`,
+            code: "E_RESOURCE_NOT_FOUND",
+            message: "The requested resource was not found",
+            detail: "Ensure that the resource exists and that you have the correct permissions to access it"
+        })
+    });
+    // Not sur if this test is really helpful, it might be auto handled by Adonis
+    test('ensure that an authenticated user can not get a workout with a SQL injection', async ({ client}) => {
+
+        const user = await UserFactory.create();
+
+        const response = await client.get(`/api/v1/trainings/1 OR 1=1`).loginAs(user);
+
+        response.assertStatus(404);
+
+        response.assertBodyContains({
+            status: 404,
+            path: `/api/v1/trainings/1%20OR%201=1`,
+            code: "E_RESOURCE_NOT_FOUND",
+            message: "The requested resource was not found",
+            detail: "Ensure that the resource exists and that you have the correct permissions to access it"
+        })
     });
 
 
