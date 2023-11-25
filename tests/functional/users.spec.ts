@@ -1,6 +1,7 @@
 import { test } from '@japa/runner'
 import Database from '@ioc:Adonis/Lucid/Database'
 import UserFactory from '../../database/factories/UserFactory'
+import TrainingFactory from '../../database/factories/TrainingFactory'
 
 
 test.group('Users', (group) => {
@@ -43,8 +44,6 @@ test.group('Users', (group) => {
         return response.assertBodyContains({authenticated: true});
 
     });
-
-
 
 });
 
@@ -95,6 +94,7 @@ test.group('Users - Login / Logout', (group) => {
 
     test('ensure that we cannot login with invalid email', async ({ client}) => {
 
+        // @ts-ignore
         const user = await UserFactory.create();
 
         const response = await client.post('/api/v1/auth/login').json({
@@ -361,6 +361,71 @@ test.group('Users | Register', (group) => {
 
 
 
+
+
+});
+
+test.group("Workouts | Create", (group) => {
+
+    group.each.setup(async () => {
+        await Database.beginGlobalTransaction()
+        return () => Database.rollbackGlobalTransaction()
+    });
+
+    test('ensure that we can create a workout', async ({assert, client}) => {
+
+        const user = await UserFactory.create();
+
+        const response = await client.post('/api/v1/trainings').loginAs(user).json({
+            name: "My workout",
+        });
+
+        response.assertStatus(200);
+
+        assert.equal(response.body().name, "My workout");
+
+    });
+
+    test('ensure that unauthenticated user cannot create a workout', async ({ client}) => {
+
+        const response = await client.post('/api/v1/trainings').json({
+            name: "My workout",
+        });
+
+        response.assertStatus(401);
+        response.assertBodyContains({
+            status: 401,
+            path: "/api/v1/trainings",
+            code: "E_UNAUTHORIZED_ACCESS",
+            message: "You are not authorized to access this resource",
+            detail: "Ensure that you have the correct permissions and try again"
+        })
+
+    });
+
+
+
+
+});
+test.group("Workouts | Index / Show", (group) => {
+
+    group.each.setup(async () => {
+        await Database.beginGlobalTransaction()
+        return () => Database.rollbackGlobalTransaction()
+    });
+
+    test('ensure that we can get all workouts', async ({assert, client}) => {
+
+            const user = await UserFactory.create();
+
+            await TrainingFactory.merge({userId: user.id}).createMany(3);
+
+            const response = await client.get('/api/v1/trainings').loginAs(user);
+
+            response.assertStatus(200);
+
+            assert.equal(response.body().length, 3);
+    });
 
 
 });

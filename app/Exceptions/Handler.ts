@@ -29,8 +29,6 @@ export default class ExceptionHandler extends HttpExceptionHandler {
 
     // Gestion d'erreur
     public async handle(error, ctx) {
-
-        console.log(error.code);
         // Unauthorized
         if (error.code === "E_UNAUTHORIZED_ACCESS") {
             return ctx.response.unauthorized({
