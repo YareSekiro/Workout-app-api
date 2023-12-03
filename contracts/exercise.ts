@@ -1,7 +1,7 @@
 declare module '@contracts/customInterfaces' {
     interface trainingData {
         workout_session: number,
-        data: [],
+        data: number[],
         created_at: string,
     }
 }

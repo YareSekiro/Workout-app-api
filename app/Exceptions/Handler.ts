@@ -30,70 +30,74 @@ export default class ExceptionHandler extends HttpExceptionHandler {
     // Gestion d'erreur
     public async handle(error, ctx) {
         // Unauthorized
-        if (error.code === "E_UNAUTHORIZED_ACCESS") {
+        if (error.code === 'E_UNAUTHORIZED_ACCESS') {
             return ctx.response.unauthorized({
                 status: 401,
                 path: ctx.request.url(),
-                code: "E_UNAUTHORIZED_ACCESS",
-                message: "You are not authorized to access this resource",
-                detail: "Ensure that you have the correct permissions and try again"
+                code: 'E_UNAUTHORIZED_ACCESS',
+                message: 'You are not authorized to access this resource',
+                detail: 'Ensure that you have the correct permissions and try again',
             })
         }
 
-        if (['E_INVALID_AUTH_UID', 'E_INVALID_AUTH_UID_PASSWORD', 'E_INVALID_AUTH_PASSWORD'].includes(error.code)) {
+        if (
+            [
+                'E_INVALID_AUTH_UID',
+                'E_INVALID_AUTH_UID_PASSWORD',
+                'E_INVALID_AUTH_PASSWORD',
+            ].includes(error.code)
+        ) {
             return ctx.response.badRequest({
-                code: "E_INVALID_CREDENTIALS",
-                message: "No account can be found with the provided credentials"
+                code: 'E_INVALID_CREDENTIALS',
+                message: 'No account can be found with the provided credentials',
             })
         }
 
         // Si l'erreur est de type ValidationException, on retourne une erreur 422 avec le message de validation
-        if (error.code === "E_VALIDATION_FAILURE") {
+        if (error.code === 'E_VALIDATION_FAILURE') {
             return ctx.response.unprocessableEntity({
                 status: 422,
                 path: ctx.request.url(),
-                code: "E_VALIDATION_FAILURE",
-                message: "Validation error",
-                errors: error.messages
+                code: 'E_VALIDATION_FAILURE',
+                message: 'Validation error',
+                errors: error.messages,
             })
         }
 
-        if(
-            (error.code === "E_AUTHORIZATION_FAILURE" && error.status === 404) ||
-            error.code === "E_ROW_NOT_FOUND"
+        if (
+            (error.code === 'E_AUTHORIZATION_FAILURE' && error.status === 404) ||
+            error.code === 'E_ROW_NOT_FOUND'
         ) {
             return ctx.response.notFound({
                 status: 404,
                 path: ctx.request.url(),
-                code: "E_RESOURCE_NOT_FOUND",
-                message: "The requested resource was not found",
-                detail: "Ensure that the resource exists and that you have the correct permissions to access it"
+                code: 'E_RESOURCE_NOT_FOUND',
+                message: 'The requested resource was not found',
+                detail: 'Ensure that the resource exists and that you have the correct permissions to access it',
             })
         }
 
-        if (error.code === "E_ROUTE_NOT_FOUND") {
+        if (error.code === 'E_ROUTE_NOT_FOUND') {
             return ctx.response.notFound({
                 status: 404,
                 path: ctx.request.url(),
-                code: "E_ROUTE_NOT_FOUND",
-                message: "The requested route was not found",
-                detail: "Ensure that the route exists"
+                code: 'E_ROUTE_NOT_FOUND',
+                message: 'The requested route was not found',
+                detail: 'Ensure that the route exists',
             })
         }
 
         // Certaines erreurs sont gérées par AdonisJS nativement et on appel donc leur méthode handle pour gérer l'erreur
-        if (typeof error.handle === "function") {
+        if (typeof error.handle === 'function') {
             return error.handle(error, ctx)
         }
 
-        return ctx.response.notFound({
+        return ctx.response.internalServerError({
             status: 500,
             path: ctx.request.url(),
-            code: "E_INTERNAL_SERVER_ERROR",
-            message: "An internal server error occurred",
+            code: 'E_INTERNAL_SERVER_ERROR',
+            message: 'An internal server error occurred',
         })
-
-
     }
 
     // public async report(error, ctx) {
@@ -109,5 +113,4 @@ export default class ExceptionHandler extends HttpExceptionHandler {
     //
     //
     // }
-
 }

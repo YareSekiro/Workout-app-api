@@ -1,14 +1,14 @@
 import BaseSchema from '@ioc:Adonis/Lucid/Schema'
 
 export default class extends BaseSchema {
-    protected tableName = 'trainings'
+    protected tableName = 'exercises'
 
     public async up() {
         this.schema.createTable(this.tableName, (table) => {
             table.increments('id')
-            // Chaque entraînement est associé à un utilisateur.
-            table.integer('user_id').unsigned().references('users.id').onDelete('CASCADE')
             table.string('name', 255).notNullable()
+            table.string('description', 255).notNullable()
+            table.string('image', 255).notNullable()
             /**
              * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
              */

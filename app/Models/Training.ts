@@ -1,13 +1,14 @@
 import { DateTime } from 'luxon'
-import { BaseModel, BelongsTo, HasMany, belongsTo, column, hasMany } from '@ioc:Adonis/Lucid/Orm'
-import TrainingExercice from './TrainingExercice'
+import { BaseModel, BelongsTo, belongsTo, column, ManyToMany } from '@ioc:Adonis/Lucid/Orm'
 import User from './User'
+import { manyToMany } from '@adonisjs/lucid/build/src/Orm/Decorators'
+import Exercise from './Exercise'
 
 export default class Training extends BaseModel {
     @column({ isPrimary: true })
     public id: number
     // Chaque entraînement est associé à un utilisateur.
-    @column({ columnName: 'user_id'})
+    @column({ columnName: 'user_id' })
     public userId: number
 
     @column()
@@ -19,13 +20,14 @@ export default class Training extends BaseModel {
     @column.dateTime({ autoCreate: true, autoUpdate: true })
     public updatedAt: DateTime
 
-    // Un entraînement peut avoir plusieurs exercices,
-    // et il faut donc définir la relation entre les deux modèles.
-    @hasMany(() => TrainingExercice)
-    public trainingExercices: HasMany<typeof TrainingExercice>
-
     // Un entraînement est cependant associé à UN utilisateur.
     @belongsTo(() => User)
     public user: BelongsTo<typeof User>
 
+    @manyToMany(() => Exercise, {
+        pivotTable: 'training_exercises',
+        pivotForeignKey: 'training_id',
+        pivotRelatedForeignKey: 'exercise_id',
+    })
+    public exercises: ManyToMany<typeof Exercise>
 }

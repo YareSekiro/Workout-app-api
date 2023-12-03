@@ -1,7 +1,7 @@
-import { schema, CustomMessages, rules } from '@ioc:Adonis/Core/Validator'
+import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
-export default class ExerciceValidator {
+export default class ExercisesDetailValidator {
     constructor(protected ctx: HttpContextContract) {}
 
     /*
@@ -23,11 +23,11 @@ export default class ExerciceValidator {
      *     ])
      *    ```
      */
-
     public schema = schema.create({
-        name: schema.string({}, [rules.trim(), rules.minLength(3), rules.maxLength(255)]),
-        description: schema.string({}, [rules.trim(), rules.minLength(3), rules.maxLength(255)]),
-        image: schema.string({}, [rules.trim(), rules.minLength(3), rules.maxLength(255)]),
+        setNumber: schema.number(),
+        reps: schema.number(),
+        weight: schema.number(),
+        restTime: schema.number(),
     })
 
     /**
